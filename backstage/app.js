@@ -46,13 +46,20 @@ app.get('/logout',function (req,res) {
     res.render('login',{});
 });
 //各页面跳转
+//首页进来就是借用申请页面
 app.get('/borrow.html',function (req,res) {
-   if(req.session.stuName){
-       var user={name:req.session.stuName};
-       res.render('borrow',{user:user});
-   }else {
-       res.render('login',{});
-   }
+    if(req.session.stuName){
+        var user={name:req.session.stuName};
+        var borrows=[];
+        dao.queryByTerm(['examineStatus'],['1'],'userdetails',function (err,result) {
+            borrows=result;
+            console.log('borrow.html:');
+            console.log(borrows);
+            res.render('borrow',{user:user,borrows:borrows});
+        });
+    }else {
+        res.render('login',{});
+    }
 });
 app.get('/return.html',function (req,res) {
     if(req.session.stuName){
@@ -113,11 +120,6 @@ app.get('/rate.html',function (req,res) {
     }else {
         res.render('login',{});
     }
-});
-//登录进来首页
-app.get('/manage',function (req,res) {
-    var user={name:req.session.stuName};
-    res.render('borrow',{user:user});
 });
 //登录页面验证
 app.post('/login',urlencodedParser,function (req,res) {
@@ -268,7 +270,7 @@ app.post('/saveRate',urlencodedParser,function (req,res) {
     var  stuIdArr= req.body['stuIdArr[]'];
     var  stuNameArr= req.body['stuNameArr[]'];
     var  stuPhoneArr= req.body['stuPhoneArr[]'];
-    var cluarr=['rateMan','rateManName','rateManPhone','rateTime','changeData'];
+    var  cluarr=['rateMan','rateManName','rateManPhone','rateTime','changeDate'];
     var  addDate= new Date().toLocaleDateString();
     var  flag=0;
     var  whereArr=['rid'];
