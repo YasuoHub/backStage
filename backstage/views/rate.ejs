@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	<!-- start: Meta -->
+	<meta charset="utf-8">
+	<title>川农实验设备管理后台</title>
+	<meta name="description" content="Bootstrap Metro Dashboard">
+	<meta name="keyword" content="Metro, Metro UI, Dashboard, Bootstrap, Admin, Template, Theme, Responsive, Fluid, Retina">
+	<!-- end: Meta -->
+
+	<!-- start: Mobile Specific -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- end: Mobile Specific -->
+
+	<!-- start: CSS -->
+	<link id="bootstrap-style" href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+	<link id="base-style" href="css/style.css" rel="stylesheet">
+	<link id="base-style-responsive" href="css/style-responsive.css" rel="stylesheet">
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&subset=latin,cyrillic-ext,latin-ext' rel='stylesheet' type='text/css'>
+	<!-- end: CSS -->
+
+
+	<!-- The HTML5 shim, for IE6-8 support of HTML5 elements -->
+	<!--[if lt IE 9]>
+	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<link id="ie-style" href="css/ie.css" rel="stylesheet">
+	<![endif]-->
+
+	<!--[if IE 9]>
+	<link id="ie9style" href="css/ie9.css" rel="stylesheet">
+	<![endif]-->
+
+	<!-- start: Favicon -->
+	<link rel="shortcut icon" href="img/favicon.ico">
+	<!-- end: Favicon -->
+
+
+
+
+</head>
+
+<body>
+<!-- start: Header -->
+<div class="navbar">
+	<div class="navbar-inner">
+		<div class="container-fluid">
+			<a class="btn btn-navbar" data-toggle="collapse" data-target=".top-nav.nav-collapse,.sidebar-nav.nav-collapse">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</a>
+			<a class="brand" href="borrow.html"><span>川农实验设备管理后台</span></a>
+
+			<!-- start: Header Menu -->
+			<div class="nav-no-collapse header-nav">
+				<ul class="nav pull-right">
+					<li class="dropdown">
+						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+							<i class="halflings-icon white user"></i> <%=user.name%>
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<li><a href="logout"><i class="halflings-icon off"></i> 注销</a></li>
+						</ul>
+					</li>
+					<!-- end: User Dropdown -->
+				</ul>
+			</div>
+			<!-- end: Header Menu -->
+
+		</div>
+	</div>
+</div>
+<!-- start: Header -->
+
+<div class="container-fluid-full">
+	<div class="row-fluid">
+
+		<!-- start: Main Menu -->
+		<div id="sidebar-left" class="span2">
+			<div class="nav-collapse sidebar-nav">
+				<ul class="nav nav-tabs nav-stacked main-menu">
+					<li><a href="borrow.html"><i class="icon-bar-chart"></i><span class="hidden-tablet"> 借用申请</span></a></li>
+					<li><a href="return.html"><i class="icon-envelope"></i><span class="hidden-tablet"> 归还检查</span></a></li>
+					<li><a href="history.html"><i class="icon-tasks"></i><span class="hidden-tablet"> 借用/归还记录查询</span></a></li>
+					<li><a href="update.html"><i class="icon-eye-open"></i><span class="hidden-tablet"> 设备更新</span></a></li>
+					<li><a href="classUpdate.html"><i class="icon-eye-open"></i><span class="hidden-tablet"> 设备种类更新</span></a></li>
+					<li><a href="service.html"><i class="icon-dashboard"></i><span class="hidden-tablet"> 维修申请</span></a></li>
+					<li><a href="board.html"><i class="icon-edit"></i><span class="hidden-tablet"> 公告发布</span></a></li>
+					<li><a href="rate.html"><i class="icon-list-alt"></i><span class="hidden-tablet"> 值班表</span></a></li>
+				</ul>
+			</div>
+		</div>
+		<!-- end: Main Menu -->
+
+		<noscript>
+			<div class="alert alert-block span10">
+				<h4 class="alert-heading">Warning!</h4>
+				<p>You need to have <a href="http://en.wikipedia.org/wiki/JavaScript" target="_blank">JavaScript</a> enabled to use this site.</p>
+			</div>
+		</noscript>
+
+		<!-- start: Content -->
+		<div id="content" class="span10">
+
+
+			<ul class="breadcrumb">
+				<li>
+					<i class="icon-home"></i>
+					<a href="borrow.html">Home</a>
+					<i class="icon-angle-right"></i>
+				</li>
+				<li>
+					<i class="icon-edit"></i>
+					<a href="#">值班表</a>
+				</li>
+			</ul>
+			<div class="row-fluid sortable">
+				<div class="box span12">
+					<div class="box-header">
+						<h2><i class="halflings-icon white align-justify"></i><span class="break"></span>值班表</h2>
+					</div>
+					<div class="box-content">
+						<table class="table table-bordered table-striped table-condensed">
+							<thead>
+							<tr>
+								<th>编号</th>
+								<th>学号</th>
+								<th>姓名</th>
+								<th>联系方式</th>
+							</tr>
+							</thead>
+                            <% if (rates.length) { %>
+								<tbody>
+									<% rates.forEach(function(rate,index){ %>
+									<tr>
+										<td><%=index+1%></td>
+										<td class="center stuId" contenteditable="true"><%=rate.rateMan%></td>
+										<td class="center stuName" contenteditable="true"><%=rate.rateManName%></td>
+										<td class="center stuPhone" contenteditable="true"><%=rate.rateManPhone%></td>
+									</tr>
+									<% }) %>
+								</tbody>
+                            <% } %>
+						</table>
+						<div class="save">
+							<button type="button" class="btn btn-primary saveBtn">保存</button>
+							<button type="button" class="btn cancelBtn">取消</button>
+						</div>
+					</div>
+				</div><!--/span-->
+			</div><!--/row-->
+		</div><!--/.fluid-container-->
+
+		<!-- end: Content -->
+	</div><!--/#content.span10-->
+</div><!--/fluid-row-->
+
+<div class="modal hide fade" id="myModal">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal">×</button>
+		<h3>Settings</h3>
+	</div>
+	<div class="modal-body">
+		<p>Here settings can be configured...</p>
+	</div>
+	<div class="modal-footer">
+		<a href="#" class="btn" data-dismiss="modal">Close</a>
+		<a href="#" class="btn btn-primary">Save changes</a>
+	</div>
+</div>
+
+<div class="clearfix"></div>
+
+<footer>
+
+	<p>
+		<span style="text-align:left;float:left">&copy; 2013 <a href="downloads/janux-free-responsive-admin-dashboard-template/" alt="Bootstrap_Metro_Dashboard">JANUX Responsive Dashboard</a></span>
+
+	</p>
+
+</footer>
+
+<!-- start: JavaScript-->
+
+<script src="js/jquery-1.9.1.min.js"></script>
+<script src="js/jquery-migrate-1.0.0.min.js"></script>
+
+<script src="js/jquery-ui-1.10.0.custom.min.js"></script>
+
+<script src="js/jquery.ui.touch-punch.js"></script>
+
+<script src="js/modernizr.js"></script>
+
+<script src="js/bootstrap.min.js"></script>
+
+<script src="js/jquery.cookie.js"></script>
+
+<script src='js/fullcalendar.min.js'></script>
+
+<script src='js/jquery.dataTables.min.js'></script>
+
+<script src="js/excanvas.js"></script>
+<script src="js/jquery.flot.js"></script>
+<script src="js/jquery.flot.pie.js"></script>
+<script src="js/jquery.flot.stack.js"></script>
+<script src="js/jquery.flot.resize.min.js"></script>
+
+<script src="js/jquery.chosen.min.js"></script>
+
+<script src="js/jquery.uniform.min.js"></script>
+
+<script src="js/jquery.cleditor.min.js"></script>
+
+<script src="js/jquery.noty.js"></script>
+
+<script src="js/jquery.elfinder.min.js"></script>
+
+<script src="js/jquery.raty.min.js"></script>
+
+<script src="js/jquery.iphone.toggle.js"></script>
+
+<script src="js/jquery.uploadify-3.1.min.js"></script>
+
+<script src="js/jquery.gritter.min.js"></script>
+
+<script src="js/jquery.imagesloaded.js"></script>
+
+<script src="js/jquery.masonry.min.js"></script>
+
+<script src="js/jquery.knob.modified.js"></script>
+
+<script src="js/jquery.sparkline.min.js"></script>
+
+<script src="js/counter.js"></script>
+
+<script src="js/retina.js"></script>
+
+<script src="js/custom.js"></script>
+<!-- end: JavaScript-->
+
+</body>
+</html>
+<script>
+    $(".save").on("click",'.saveBtn',changeRate);
+//    $(".changeInfo").click(function () {
+//           $(this).addClass('saveBtn');
+//           $(this).removeClass('changeInfo');
+//           $(this).html("保存");
+//       }
+//	)
+    function changeRate() {
+        var This=this;
+        var stuIdArr=[];
+        var stuNameArr=[];
+        var stuPhoneArr=[];
+        for(let i=0;i<$(".stuId").length;i++){
+            stuIdArr[i]=$(".stuId")[i].innerHTML;
+        }
+        for(let j=0;j<$(".stuName").length;j++){
+            stuNameArr[j]=$(".stuName")[j].innerHTML;
+        }
+        for(let k=0;k<$(".stuPhone").length;k++){
+            stuPhoneArr[k]=$(".stuPhone")[k].innerHTML;
+        }
+        $.ajax({
+            url: 'saveRate',
+            type: 'POST',
+            dataType: 'text',
+            data: {'stuIdArr': stuIdArr,'stuNameArr': stuNameArr,'stuPhoneArr': stuPhoneArr},
+        })
+            .done(function(data) {
+                if(data=="1"){
+                    alert("保存成功");
+                }else{
+                    alert("保存失败,请刷新后重试！");
+                }
+            });
+//        $(This).removeClass('saveBtn');
+//        $(This).addClass('changeInfo');
+//        $(This).html("修改");
+//        $(This).off("click",changeRate);
+    }
+//	$(".save").on('click','.saveBtn',function () {
+//        var stuIdArr=[];
+//        var stuNameArr=[];
+//        var stuPhoneArr=[];
+//        for(let i=0;i<$(".stuId").length;i++){
+//            stuIdArr[i]=$(".stuId")[i].innerHTML;
+//        }
+//        for(let j=0;j<$(".stuName").length;j++){
+//            stuNameArr[j]=$(".stuName")[j].innerHTML;
+//        }
+//        for(let k=0;k<$(".stuPhone").length;k++){
+//            stuPhoneArr[k]=$(".stuPhone")[k].innerHTML;
+//        }
+//        console.log(stuNameArr);
+//        $.ajax({
+//            url: 'saveRate',
+//            type: 'POST',
+//            dataType: 'text',
+//            data: {'stuIdArr': stuIdArr,'stuNameArr': stuNameArr,'stuPhoneArr': stuPhoneArr},
+//        })
+//            .done(function(data) {
+//                if(data=="1"){
+//                    alert("保存成功");
+//                }else{
+//                    alert("保存失败,请刷新后重试！");
+//                }
+//            });
+//        $(this).addClass('changeInfo');
+//        $(this).removeClass('saveBtn');
+//        $(this).html("修改");
+//    })
+//	$(".saveBtn").click();
+
+
+
+
+
+</script>
