@@ -41,7 +41,7 @@
 		   vertical-align: middle;
 	   }
 	</style>
-		
+	<script src="http://apps.bdimg.com/libs/vue/1.0.14/vue.js"></script>
 		
 </head>
 
@@ -125,7 +125,7 @@
 							<a href="#" class="btn-close"><i class="halflings-icon white remove"></i></a>
 						</div>
 					</div>
-					<div class="box-content">
+					<div class="box-content" id="borrowTable">
 						<table class="table table-striped">
 							<thead>
 							<tr>
@@ -138,7 +138,7 @@
 								<th>操作</th>
 							</tr>
 							</thead>
-							<% if (borrows.length) { %>
+                            <% if (borrows.length) { %>
 							<tbody>
                             <% borrows.forEach(function(borrow){ %>
 							<tr>
@@ -148,11 +148,11 @@
 								<td class="center"><%=borrow.equipName%></td>
 								<td class="center"><%=borrow.addDate.toLocaleDateString()%></td>
 								<td class="center"><%=borrow.loanDay%></td>
-								<td class="center ">
-									<a class="btn btn-success" href="#">
+								<td class="center " data-udid="<%=borrow.uDid%>">
+									<a class="btn btn-success passApply" href="#">
 										<i class="halflings-icon white ok"></i>
 									</a>
-									<a class="btn btn-danger" href="#">
+									<a class="btn btn-danger failApply" href="#">
 										<i class="halflings-icon white remove"></i>
 									</a>
 								</td>
@@ -160,17 +160,35 @@
                             <% }) %>
 							</tbody>
                             <% } %>
+						<!--	<tbody>
+							<tr v-for="borrow in borrows">
+								<td>{{borrow.userID}}</td>
+								<td class="center">{{borrow.userName}}</td>
+								<td class="center">{{borrow.equipID}}</td>
+								<td class="center">{{borrow.equipName}}</td>
+								<td class="center">{{borrow.addDate.toLocaleDateString()}}</td>
+								<td class="center">{{borrow.loanDay}}</td>
+								<td class="center " :data-udid="{{borrow.userName}}">
+									<a class="btn btn-success passApply" href="#">
+										<i class="halflings-icon white ok"></i>
+									</a>
+									<a class="btn btn-danger failApply" href="#">
+										<i class="halflings-icon white remove"></i>
+									</a>
+								</td>
+							</tr>
+							</tbody>-->
 						</table>
 						<div class="pagination pagination-centered">
 							<ul>
-								<li><a href="#">Prev</a></li>
+								<li><a href="#"><</a></li>
 								<li class="active">
 									<a href="#">1</a>
 								</li>
 								<li><a href="#">2</a></li>
 								<li><a href="#">3</a></li>
 								<li><a href="#">4</a></li>
-								<li><a href="#">Next</a></li>
+								<li><a href="#">></a></li>
 							</ul>
 						</div>
 					</div>
@@ -215,8 +233,44 @@
 		</p>
 
 	</footer>
-	
-	<!-- start: JavaScript-->
+	   <div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnModalTitle" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4 class="modal-title" id="returnModalTitle">
+							申请不通过原因
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div class="input-group">
+							<div class="form-group">
+							<form id="failReason">
+								<fieldset>
+								<label class="checkbox">
+									<input name="failReason" type="radio" value="1"> 实验设备意外损坏,请耐心等待维修结束
+								</label>
+								<label class="checkbox">
+									<input name="failReason" type="radio" value="2"> 您的信用额度不足，请持有效证件到设备管理处重新办理借用资格
+								</label>
+								<label class="checkbox">
+									<input name="failReason" type="radio" value="3"> 实验设备临时用作课堂教学，暂时无法外借，请耐心等待
+								</label>
+								</fieldset>
+							</form>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" id="failReasonSubmit" class="btn btn-default" data-dismiss="modal">确定
+						</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+		<!-- start: JavaScript-->
 
 		<script src="js/jquery-1.9.1.min.js"></script>
 	<script src="js/jquery-migrate-1.0.0.min.js"></script>
@@ -276,3 +330,63 @@
 	
 </body>
 </html>
+<script>
+	$("#borrowTable").on('click','.passApply',function (event) {
+		var udid=$(event.target).parents('.center').data('udid');
+        $.ajax({
+            url: 'changeBorrowApply',
+            type: 'POST',
+            dataType: 'text',
+            data: {isPass: '1',udid:udid}
+        })
+            .done(function(data) {
+                if(data=='1'){
+                    $(event.target).parents('tr').remove();
+				}else{
+                    alert('未知错误，请刷新后再处理！');
+				}
+            });
+
+    });
+    $("#borrowTable").on('click','.failApply',function (event) {
+        var udid=$(event.target).parents('.center').data('udid');
+        $('#returnModal').modal('show');
+        $('#failReasonSubmit').click(function (){
+            var failReason=$('#failReason').serialize().split('=')[1];
+            $('#failReason').get(0).reset();
+                $.ajax({
+                    url: 'changeBorrowApply',
+                    type: 'POST',
+                    dataType: 'text',
+                    data: {isPass: '0',udid:udid,failReason:failReason}
+                })
+                    .done(function(data) {
+                        if(data=='1'){
+                            $(event.target).parents('tr').remove();
+                        }else{
+                            alert('未知错误，请刷新后再处理！');
+                        }
+                    });
+        });
+    });
+    /*let vw = new Vue({
+        el:'#borrowTable',
+        data:{
+            borrows:'<=borrows>'
+        },
+        //计算属性
+        computed:{
+            tableNums:{
+                get:function () {
+                    return this.legnums / 4;
+                },
+                set:function (n) {
+                    this.legnums = n * 4;
+                }
+            }
+        }
+    });
+*/
+
+
+</script>

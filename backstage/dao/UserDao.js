@@ -17,8 +17,6 @@ function UserDao() {
             database:'equip',      //数据库里面的数据
             charset:'UTF8_GENERAL_CI'
         });
-        //3,连接
-        connection.connect();
     };
 //在表中查询所有数据
     this.query=function (user,call) {
@@ -62,8 +60,6 @@ function UserDao() {
                 return;
             }
         });
-        //5,连接结束
-        // connection.end();
     };
 //插入操作
     this.insert= function (cluarr,Paramsarr,users,call) {
@@ -101,9 +97,6 @@ function UserDao() {
                 console.log(err);
             }
         });
-
-
-
     };
     //更新操作
     //UPDATE websites SET name = ?,url = ? WHERE Id = ?
@@ -144,9 +137,6 @@ function UserDao() {
                 console.log(err);
             }
         });
-
-
-
     };
     this.finish=function () {
         //5,连接结束

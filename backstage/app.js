@@ -30,10 +30,7 @@ app.use(session({
     rolling:true //在每次请求时强行设置 cookie，这将重置 cookie 过期时间(默认：false)
 }));
 
-//初始化数据查询对象
-var dao = new UserDao();
-//2，数据初始化，连接数据库
-dao.init();
+
 app.get('/',function (req,res) {
     res.render('login',{});
 });
@@ -48,13 +45,16 @@ app.get('/logout',function (req,res) {
 //各页面跳转
 //首页进来就是借用申请页面
 app.get('/borrow.html',function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     if(req.session.stuName){
         var user={name:req.session.stuName};
         var borrows=[];
         dao.queryByTerm(['examineStatus'],['1'],'userdetails',function (err,result) {
             borrows=result;
-            console.log('borrow.html:');
-            console.log(borrows);
+            dao.finish();
             res.render('borrow',{user:user,borrows:borrows});
         });
     }else {
@@ -110,19 +110,53 @@ app.get('/board.html',function (req,res) {
     }
 });
 app.get('/rate.html',function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     if(req.session.stuName){
         var user={name:req.session.stuName};
         var rates=[];
         dao.query("rate",function (err,result) {
             rates=result;
+            dao.finish();
             res.render('rate',{user:user,rates:rates});
         });
     }else {
         res.render('login',{});
     }
 });
+/////////////////////////////////业务处理
+//处理借用申请通过
+app.post('/changeBorrowApply',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    console.log("我是changeBorrowApply");
+    console.log(req.body);
+    // //1,从body里面获得提交的数据
+    var isPass = req.body.isPass;
+    var udid = req.body.udid;
+    var failReason = null;
+    var whereArr = ['uDid'];
+    var cluarr = ['isPass', 'failReason', 'examineStatus', 'readSatus', 'changeSatus'];
+    if (req.body.failReason) {
+        failReason = req.body.failReason;
+    }
+    var Paramsarr = [isPass, failReason, '0', '1', '1'];
+    dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
+        console.log("修改成功");
+        dao.finish();
+        return  res.send('1');
+    });
+});
 //登录页面验证
 app.post('/login',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     // res.render('login',{});
     var username= req.body.username;
     var passwd  = req.body.password;
@@ -132,23 +166,24 @@ app.post('/login',urlencodedParser,function (req,res) {
     console.log(req.body);
     req.session.username=username;
     dao.queryByTerm(termArr,termValueArr,'users',function (err,data) {
+        dao.finish();
         if(data.length!=0){
             console.log(data[0]);
             req.session.stuName         =data[0].stuName;
             if(data[0].stuPassWord!=passwd){
-                 res.end('3');//密码错误
+                return   res.end('3');//密码错误
             }
             if(remember){
                 // req.cookies("user",{"username":username,"passwd":passwd});
             }
             console.log(req.session);
             if(data[0].power=='1'){
-                res.end('1');//权限为管理员
+                return   res.end('1');//权限为管理员
             }else if( data[0].power=='0') {
-                res.end('-1');//没有权限
+                return   res.end('-1');//没有权限
             }
         }else{
-                res.end('2');//账号错误
+            return  res.end('2');//账号错误
         }
 
     });
@@ -156,6 +191,10 @@ app.post('/login',urlencodedParser,function (req,res) {
 });
 //保存实验设备种类更新信息
 app.post('/saveClassUpdate',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     console.log("我是saveClassUpdate");
     console.log(req.body);
     //1,从body里面获得提交的数据
@@ -168,11 +207,16 @@ app.post('/saveClassUpdate',urlencodedParser,function (req,res) {
     var cluarr=['equipName','equipAllNo','equipImage','addMan','equipAddDate'];
     var Paramsarr=[equipName,equipAllNo,equipImage,addMan,equipAddDate];
     dao.insert(cluarr,Paramsarr,'equipmentall',function () {
-        res.end('1');
+        dao.finish();
+        return  res.end('1');
     }) ;
 });
 //保存实验设备更新信息
 app.post('/saveUpdate',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     console.log("我是saveUpdate");
     console.log(req.body);
     //1,从body里面获得提交的数据
@@ -189,7 +233,7 @@ app.post('/saveUpdate',urlencodedParser,function (req,res) {
     var  termValueArr=[equipNo];
     dao.queryByTerm(['equipAllNo'],[equipNo],'equipmentall',function (err,data) {
         if(data.length==0){
-            res.end("-1");//表示该实验设备分类不存在
+            return  res.end("-1");//表示该实验设备分类不存在
         }else{
             dao.queryByTerm(termArr,termValueArr,'equipmentone',function (err,data) {
                 //声明将要生成的实验设备编号
@@ -224,7 +268,8 @@ app.post('/saveUpdate',urlencodedParser,function (req,res) {
                         if(equipNum!=1){
                             returnStr +='-'+equipID;
                         }
-                        res.end(returnStr);
+                        dao.finish();
+                        return   res.end(returnStr);
                     }
                 })(equipNum);
             });
@@ -233,6 +278,10 @@ app.post('/saveUpdate',urlencodedParser,function (req,res) {
 });
 //保存公告发布模块信息
 app.post('/saveBoard',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     //1,从body里面获得提交的数据
     var  title= req.body.title;
     var  content= req.body.content;
@@ -242,11 +291,16 @@ app.post('/saveBoard',urlencodedParser,function (req,res) {
     var cluarr=['title','content','addMan','addDate'];
     var Paramsarr=[title,content,addMan,addDate];
     dao.insert(cluarr,Paramsarr,'board',function () {
-        res.end('1');
+        dao.finish();
+        return   res.end('1');
     }) ;
     });
 //保存报修信息
 app.post('/saveService',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     console.log("我是saveService");
     console.log(req.body);
     //1,从body里面获得提交的数据
@@ -260,11 +314,16 @@ app.post('/saveService',urlencodedParser,function (req,res) {
     var cluarr=['equipID','damReason','damMan','damManTel','addMan','addDate'];
     var Paramsarr=[equipID,damReason,damMan,damManTel,addMan,addDate];
     dao.insert(cluarr,Paramsarr,'service',function () {
-        res.end('1');
+        dao.finish();
+        return  res.end('1');
     }) ;
 });
 //保存值日表信息
 app.post('/saveRate',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     console.log("我是SAVERATE");
     //1,从body里面获得提交的数据
     var  stuIdArr= req.body['stuIdArr[]'];
@@ -286,11 +345,13 @@ app.post('/saveRate',urlencodedParser,function (req,res) {
             }) ;
             insertRate(flag);
         }else {
-            res.end('1');
+            dao.finish();
+           return res.end('1');
         }
     })(flag);
 });
 app.post('/register',urlencodedParser,function (req,res) {
+
     //1,从body里面获得提交的数据
     var  email= req.body.email;
     var  name= req.body.name;
@@ -309,6 +370,7 @@ app.post('/register',urlencodedParser,function (req,res) {
             console.log("执行插入");
             //执行插入
             dao.insert(name,email,passwd,function () {
+                dao.finish();
                 res.render('index',{});
             });
 
