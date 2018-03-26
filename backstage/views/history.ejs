@@ -27,7 +27,7 @@
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 	<link id="ie-style" href="css/ie.css" rel="stylesheet">
 	<![endif]-->
-
+	<script src="http://apps.bdimg.com/libs/vue/1.0.14/vue.js"></script>
 	<!--[if IE 9]>
 	<link id="ie9style" href="css/ie9.css" rel="stylesheet">
 	<![endif]-->
@@ -35,12 +35,15 @@
 	<!-- start: Favicon -->
 	<link rel="shortcut icon" href="img/favicon.ico">
 	<!-- end: Favicon -->
-
-
-
-
+	<style>
+		.searchInput{
+			width: 90%;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+		}
+	</style>
 </head>
-
 <body>
 <!-- start: Header -->
 <div class="navbar">
@@ -83,6 +86,8 @@
 			<div class="nav-collapse sidebar-nav">
 				<ul class="nav nav-tabs nav-stacked main-menu">
 					<li><a href="borrow.html"><i class="icon-bar-chart"></i><span class="hidden-tablet"> 借用申请</span></a></li>
+					<li><a href="borrowCheck.html"><i class="icon-bar-chart"></i><span class="hidden-tablet"> 借用检查</span></a></li>
+					<li><a href="returnApply.html"><i class="icon-bar-chart"></i><span class="hidden-tablet"> 归还申请</span></a></li>
 					<li><a href="return.html"><i class="icon-envelope"></i><span class="hidden-tablet"> 归还检查</span></a></li>
 					<li><a href="history.html"><i class="icon-tasks"></i><span class="hidden-tablet"> 借用/归还记录查询</span></a></li>
 					<li><a href="update.html"><i class="icon-eye-open"></i><span class="hidden-tablet"> 设备更新</span></a></li>
@@ -112,13 +117,39 @@
 				</li>
 				<li><a href="#">借用/归还记录查询</a></li>
 			</ul>
+			<div class="searchInput">
+				<div class="searchInputRow">
+					<form class="navbar-form navbar-left">
+						<div class="form-group">
+							<input id="searchStuId" type="text" class="form-control" placeholder="请输入学号"/>
+							<button id="searchStuIdBtn" type="button" class="btn btn-default" @click="getHistoryInfo"><span class="glyphicon glyphicon-search" aria-hidden="true"></span>搜索</button>
+						</div>
+
+					</form>
+				</div>
+				<div class="searchInputRow">
+					<form class="navbar-form navbar-left">
+						<div class="form-group">
+							<input id="searchEquipNum" type="text" class="form-control" placeholder="请输入设备编号"/>
+							<button id="searchEquipNumBtn" type="button" class="btn btn-default"  @click="getHistoryInfo"><span class="glyphicon glyphicon-search" aria-hidden="true"></span>搜索</button>
+						</div>
+					</form>
+				</div>
+			</div>
 			<div class="row-fluid sortable">
-				<div class="box span12">
-					<div class="box-header" data-original-title>
-						<h2><i class="halflings-icon white user"></i><span class="break"></span>记录查询</h2>
+				<div class="box span11">
+					<div class="box-header">
+						<h2><i class="halflings-icon white align-justify"></i><span class="break"></span>借用/归还记录查询</h2>
+						<div class="box-icon">
+							<a href="#" class="btn-setting"><i class="halflings-icon white wrench"></i></a>
+							<a href="#" class="btn-minimize"><i class="halflings-icon white chevron-up"></i></a>
+							<a href="#" class="btn-close"><i class="halflings-icon white remove"></i></a>
+						</div>
 					</div>
-					<div class="box-content">
-						<table class="table table-striped table-bordered bootstrap-datatable datatable">
+
+
+					<div class="box-content" id="historyTable">
+						<table class="table table-striped">
 							<thead>
 							<tr>
 								<th>学号</th>
@@ -127,21 +158,33 @@
 								<th>器材名称</th>
 								<th>申请日期</th>
 								<th>归还日期</th>
+								<th>联系方式</th>
 							</tr>
 							</thead>
 							<tbody>
-							<tr>
-								<td>Dennis Ji</td>
-								<td class="center">2012/01/01</td>
-								<td class="center">Member</td>
-								<td class="center">Member</td>
-								<td class="center">Member</td>
-								<td class="center">
-									<span class="label label-success">Active</span>
-								</td>
+							<tr v-for="history in histories">
+								<td>{{history.userID}}</td>
+								<td class="center">{{history.userName}}</td>
+								<td class="center">{{history.equipID}}</td>
+								<td class="center">{{history.equipName}}</td>
+								<td class="center">{{history.addDate | time}}</td>
+								<td class="center">{{history.returnApplyDate}}</td>
+								<td class="center">{{history.userTel}}</td>
 							</tr>
 							</tbody>
 						</table>
+						<div class="pagination pagination-centered">
+							<ul>
+								<li><a href="#"><</a></li>
+								<li class="active">
+									<a href="#">1</a>
+								</li>
+								<li><a href="#">2</a></li>
+								<li><a href="#">3</a></li>
+								<li><a href="#">4</a></li>
+								<li><a href="#">></a></li>
+							</ul>
+						</div>
 					</div>
 				</div><!--/span-->
 
@@ -247,3 +290,48 @@
 
 </body>
 </html>
+<script>
+	var vw = new Vue({
+	 el:'body',
+	 data:{
+	 histories:null
+	 },
+	//方法
+		methods:{
+	     getHistoryInfo:function (event) {
+	         var This=this;
+             console.log($(event.target.previousElementSibling).attr('id'));
+             console.log($(event.target.previousElementSibling).val());
+             var term=$(event.target.previousElementSibling).attr('id');
+             var termValue=$(event.target.previousElementSibling).val();
+                 $.ajax({
+                     url: 'getHistory',
+                     type: 'POST',
+                     dataType: 'text',
+                     data: {term: term,termValue:termValue},
+                 })
+                     .done(function(data) {
+                         console.log(data);
+                         This.histories=JSON.parse(data);
+                         console.log("success");
+                     });
+
+             }
+         }
+	 //计算属性
+//	 computed:{
+//	 tableNums:{
+//	 get:function () {
+//	 return this.legnums / 4;
+//	 },
+//	 set:function (n) {
+//	 this.legnums = n * 4;
+//	 }
+//	 }
+//	 }
+
+	 });
+    Vue.filter('time', function (value) {
+        return new Date(value).toLocaleDateString().replace(/年|月/g, "-").replace(/日/g, " ");
+    })
+</script>

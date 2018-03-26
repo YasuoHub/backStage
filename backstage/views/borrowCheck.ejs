@@ -73,7 +73,7 @@
 		</div>
 	</div>
 </div>
-<!-- start: Header -->
+<!-- start: Header --><div class="copyrights">Collect from <a href="http://www.cssmoban.com/" >企业网站模板</a></div>
 
 <div class="container-fluid-full">
 	<div class="row-fluid">
@@ -106,85 +106,94 @@
 
 		<!-- start: Content -->
 		<div id="content" class="span10">
-
-
 			<ul class="breadcrumb">
 				<li>
 					<i class="icon-home"></i>
 					<a href="borrow.html">Home</a>
 					<i class="icon-angle-right"></i>
 				</li>
-				<li>
-					<i class="icon-edit"></i>
-					<a href="#">设备更新</a>
-				</li>
+				<li><a href="#">归还检查</a></li>
 			</ul>
 			<div class="row-fluid sortable">
-				<div class="box span12">
-					<div class="box-header" data-original-title>
-						<h2><i class="halflings-icon white edit"></i><span class="break"></span>设备更新</h2>
+			<div class="box span11">
+				<div class="box-header">
+					<h2><i class="halflings-icon white align-justify"></i><span class="break"></span>设备归还检查</h2>
+					<div class="box-icon">
+						<a href="#" class="btn-setting"><i class="halflings-icon white wrench"></i></a>
+						<a href="#" class="btn-minimize"><i class="halflings-icon white chevron-up"></i></a>
+						<a href="#" class="btn-close"><i class="halflings-icon white remove"></i></a>
 					</div>
-					<div class="box-content">
-						<form class="form-horizontal">
-							<fieldset>
-								<div class="control-group">
-									<label class="control-label" for="equipNo">设备种类</label>
-									<div class="controls">
-										<input name="equipNo" type="text" class="span6 typeahead" id="equipNo"  data-provide="typeahead" data-items="4" data-source='["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Dakota","North Carolina","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]'>
-										<p class="help-block">输入设备种类编号(必填)</p>
-									</div>
-								</div>
-								<div class="control-group">
-									<label class="control-label" for="equipName">设备名称</label>
-									<div class="controls">
-										<input name="equipName" type="text" class="span6 typeahead" id="equipName"  data-provide="typeahead" data-items="4" data-source=''>
-										<p class="help-block">输入设备名称(必填)</p>
-									</div>
-								</div>
-								<div class="control-group">
-									<label class="control-label" for="equipNum">数量</label>
-									<div class="controls">
-										<input name="equipNum" type="text" class="span6 typeahead" id="equipNum"  data-provide="typeahead" data-items="4" data-source=''>
-										<p class="help-block">输入设备数量(必填)</p>
-									</div>
-								</div>
-								<div class="control-group">
-									<label class="control-label" for="equipCreator">厂商</label>
-									<div class="controls">
-										<input name="equipCreator" type="text" class="span6 typeahead" id="equipProductor"  data-provide="typeahead" data-items="4" data-source=''>
-										<p class="help-block">输入设备生产厂家(选填)</p>
-									</div>
-								</div>
-								<div class="control-group">
-									<label class="control-label" for="equipModel">型号</label>
-									<div class="controls">
-										<input name="equipModel" type="text" class="span6 typeahead" id="equipModel"  data-provide="typeahead" data-items="4" data-source=''>
-										<p class="help-block">输入设备型号(选填)</p>
-									</div>
-								</div>
-								<div class="control-group">
-									<label class="control-label" for="equipBuyDate">购买时间</label>
-									<div class="controls">
-										<input name="equipBuyDate" type="text" class="input-xlarge datepicker" id="equipBuyDate" value="<%=user.date%>">
-									</div>
-								</div>
-								<div class="control-group hidden-phone">
-									<label class="control-label" for="equipDescription">描述</label>
-									<div class="controls">
-										<textarea name="equipDescription" class="cleditor" id="equipDescription" rows="3"></textarea>
-										<p class="help-block">输入设备描述(选填)</p>
-									</div>
-								</div>
-								<div class="form-actions">
-									<button type="button" class="btn btn-primary" id="saveBtn">保存</button>
-									<button type="button" class="btn">取消</button>
-								</div>
-							</fieldset>
-						</form>
-
+				</div>
+				<div class="box-content" id="borrowCheckTable">
+					<table class="table table-striped">
+						<thead>
+						<tr>
+							<th>学号</th>
+							<th>姓名</th>
+							<th>器材编号</th>
+							<th>器材名称</th>
+							<th>申请日期</th>
+							<th>设备领取日期</th>
+							<th>联系方式</th>
+							<th>操作</th>
+						</tr>
+						</thead>
+                        <% if (borrowChecks.length) { %>
+						<tbody>
+                        <% borrowChecks.forEach(function(borrowCheck){ %>
+						<tr>
+							<td><%=borrowCheck.userID%></td>
+							<td class="center"><%=borrowCheck.userName%></td>
+							<td class="center"><%=borrowCheck.equipID%></td>
+							<td class="center"><%=borrowCheck.equipName%></td>
+							<td class="center"><%=borrowCheck.addDate.toLocaleDateString()%></td>
+							<td class="center"><%=borrowCheck.getEquipDate%></td>
+							<td class="center"><%=borrowCheck.userTel%></td>
+							<td class="center " data-udid="<%=borrowCheck.uDid%>">
+								<a class="btn btn-success getEquip" href="#">
+									<i class="halflings-icon white ok"></i>
+								</a>
+								<a class="btn btn-danger notGetEquip" href="#">
+									<i class="halflings-icon white remove"></i>
+								</a>
+							</td>
+						</tr>
+                        <% }) %>
+						</tbody>
+                        <% } %>
+						<!--	<tbody>
+							<tr v-for="borrow in borrows">
+								<td>{{borrow.userID}}</td>
+								<td class="center">{{borrow.userName}}</td>
+								<td class="center">{{borrow.equipID}}</td>
+								<td class="center">{{borrow.equipName}}</td>
+								<td class="center">{{borrow.addDate.toLocaleDateString()}}</td>
+								<td class="center">{{borrow.loanDay}}</td>
+								<td class="center " :data-udid="{{borrow.userName}}">
+									<a class="btn btn-success passApply" href="#">
+										<i class="halflings-icon white ok"></i>
+									</a>
+									<a class="btn btn-danger failApply" href="#">
+										<i class="halflings-icon white remove"></i>
+									</a>
+								</td>
+							</tr>
+							</tbody>-->
+					</table>
+					<div class="pagination pagination-centered">
+						<ul>
+							<li><a href="#"><</a></li>
+							<li class="active">
+								<a href="#">1</a>
+							</li>
+							<li><a href="#">2</a></li>
+							<li><a href="#">3</a></li>
+							<li><a href="#">4</a></li>
+							<li><a href="#">></a></li>
+						</ul>
 					</div>
-				</div><!--/span-->
-
+				</div>
+			</div><!--/span-->
 			</div><!--/row-->
 		</div><!--/.fluid-container-->
 
@@ -206,6 +215,15 @@
 	</div>
 </div>
 
+<div class="common-modal modal fade" id="common-Modal1" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-content">
+		<ul class="list-inline item-details">
+			<li><a href="#">Admin templates</a></li>
+			<li><a href="http://themescloud.org">Bootstrap themes</a></li>
+		</ul>
+	</div>
+</div>
+
 <div class="clearfix"></div>
 
 <footer>
@@ -216,7 +234,8 @@
 	</p>
 
 </footer>
-<div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnModalTitle" aria-hidden="true">
+<!--设备未领取的原因-->
+	<div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnModalTitle" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -224,24 +243,36 @@
 					&times;
 				</button>
 				<h4 class="modal-title" id="returnModalTitle">
-					设备添加结果
+					设备未领取原因
 				</h4>
 			</div>
 			<div class="modal-body">
 				<div class="input-group">
 					<div class="form-group">
-						<p>新添加实验设备: <strong><span class="equipmentName"></span></strong></p>
-						<p>编号是 <strong><span id="returnStr"></span></strong></p>
+						<form id="failReason">
+							<fieldset>
+								<label class="checkbox">
+									<input name="failReason" type="radio" value="1"> 实验设备意外损坏,无法外借
+								</label>
+								<label class="checkbox">
+									<input name="failReason" type="radio" value="2"> 实验设备临时用作课堂教学，暂时无法外借
+								</label>
+								<label class="checkbox">
+									<input name="failReason" type="radio" value="3"> 借用人未到实验设备管理处领取实验设备
+								</label>
+							</fieldset>
+						</form>
 					</div>
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">确定
+				<button type="button" id="failApplySubmit" class="btn btn-default" data-dismiss="modal">确定
 				</button>
 			</div>
 		</div><!-- /.modal-content -->
 	</div><!-- /.modal -->
 </div>
+
 <!-- start: JavaScript-->
 
 <script src="js/jquery-1.9.1.min.js"></script>
@@ -303,36 +334,40 @@
 </body>
 </html>
 <script>
-    $("#saveBtn").click(function () {
-        $(".equipmentName").html($("#equipName").val());
-        if(!$("#equipNo").val()){
-            alert("设备种类编号不能为空");
-        }else if(!$("#equipName").val()){
-            alert("设备名称不能为空");
-        }else if(!$("#equipNum").val()){
-            alert("设备数量不能为空");
-        }else{
+    $("#borrowCheckTable").on('click','.getEquip',function (event) {
+        var udid=$(event.target).parents('.center').data('udid');
             $.ajax({
-                url: '/saveUpdate',
+                url: 'ifGetEquip',
                 type: 'POST',
                 dataType: 'text',
-                data: $("form").serialize()
+                data: {loanStatus: '1',udid:udid}
             })
                 .done(function(data) {
-                    if(data!='-1'){
-                        alert("添加成功！");
-                        $("form")[0].reset();
-//                        $("iframe").contents().find("body").append("");
-                        $("#equipDescription").next().remove();
-                        $("#returnStr")[0].innerHTML=data;
-                        $('#returnModal').modal('show');
-                    }else if(data=='-1'){
-                        alert("您填写的设备分类有误,请检查后重新输入!")
+                    if(data=='1'){
+                        $(event.target).parents('tr').remove();
+                    }else{
+                        alert('未知错误，请刷新后再处理！');
                     }
                 });
-
-        }
-    }	)
-
-
+    });
+    $("#borrowCheckTable").on('click','.notGetEquip',function (event) {
+        $('#returnModal').modal('show');
+        var udid=$(event.target).parents('.center').data('udid');
+        $('#failApplySubmit').click(function () {
+            var failReason=$('#failReason').serialize().split('=')[1];
+            $.ajax({
+                url: 'ifGetEquip',
+                type: 'POST',
+                dataType: 'text',
+                data: {loanStatus: '0',udid:udid,failReason:failReason,delateStatus:'0'}
+            })
+                .done(function(data) {
+                    if(data=='1'){
+                        $(event.target).parents('tr').remove();
+                    }else{
+                        alert('未知错误，请刷新后再处理！');
+                    }
+                });
+        })
+    });
 </script>

@@ -87,6 +87,8 @@
 				<div class="nav-collapse sidebar-nav">
 					<ul class="nav nav-tabs nav-stacked main-menu">
 						<li><a href="borrow.html"><i class="icon-bar-chart"></i><span class="hidden-tablet"> 借用申请</span></a></li>
+						<li><a href="borrowCheck.html"><i class="icon-bar-chart"></i><span class="hidden-tablet"> 借用检查</span></a></li>
+						<li><a href="returnApply.html"><i class="icon-bar-chart"></i><span class="hidden-tablet"> 归还申请</span></a></li>
 						<li><a href="return.html"><i class="icon-envelope"></i><span class="hidden-tablet"> 归还检查</span></a></li>
 						<li><a href="history.html"><i class="icon-tasks"></i><span class="hidden-tablet"> 借用/归还记录查询</span></a></li>
 						<li><a href="update.html"><i class="icon-eye-open"></i><span class="hidden-tablet"> 设备更新</span></a></li>
@@ -116,6 +118,7 @@
 					</li>
 					<li><a href="#">借用申请</a></li>
 				</ul>
+				<div class="row-fluid sortable">
 				<div class="box span11">
 					<div class="box-header">
 						<h2><i class="halflings-icon white align-justify"></i><span class="break"></span>设备借用申请审批</h2>
@@ -134,7 +137,7 @@
 								<th>器材编号</th>
 								<th>器材名称</th>
 								<th>申请日期</th>
-								<th>借用期限</th>
+								<th>预期归还时间</th>
 								<th>操作</th>
 							</tr>
 							</thead>
@@ -147,7 +150,7 @@
 								<td class="center"><%=borrow.equipID%></td>
 								<td class="center"><%=borrow.equipName%></td>
 								<td class="center"><%=borrow.addDate.toLocaleDateString()%></td>
-								<td class="center"><%=borrow.loanDay%></td>
+								<td class="center"><%=borrow.expectedReturnDate.toLocaleDateString()%></td>
 								<td class="center " data-udid="<%=borrow.uDid%>">
 									<a class="btn btn-success passApply" href="#">
 										<i class="halflings-icon white ok"></i>
@@ -193,7 +196,7 @@
 						</div>
 					</div>
 				</div><!--/span-->
-
+				</div><!--/row-->
 	</div><!--/.fluid-container-->
 	
 			<!-- end: Content -->
@@ -233,6 +236,7 @@
 		</p>
 
 	</footer>
+		<!--申请不通过原因模态框-->
 	   <div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnModalTitle" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -265,6 +269,62 @@
 					</div>
 					<div class="modal-footer">
 						<button type="button" id="failReasonSubmit" class="btn btn-default" data-dismiss="modal">确定
+						</button>
+					</div>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal -->
+		</div>
+		<!--申请通过时间模态框-->
+		<div class="modal fade" id="getEquipTime" tabindex="-1" role="dialog" aria-labelledby="returnModalTitle" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+							&times;
+						</button>
+						<h4 class="modal-title" id="returnModalTitle">
+							实验设备领取时间
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div class="input-group">
+							<div class="form-group">
+								<form id="getEquipmentDate">
+									<fieldset>
+										<label class="checkbox">
+											<input name="failReason" type="radio" value="本周一"> 本周一
+										</label>
+										<label class="checkbox">
+											<input name="failReason" type="radio" value="本周二"> 本周二
+										</label>
+										<label class="checkbox">
+											<input name="failReason" type="radio" value="本周三"> 本周三
+										</label>
+										<label class="checkbox">
+											<input name="failReason" type="radio" value="本周四"> 本周四
+										</label>
+										<label class="checkbox">
+											<input name="failReason" type="radio" value="本周五"> 本周五
+										</label>
+										<label class="checkbox">
+											<input name="failReason" type="radio" value="本周六"> 本周六
+										</label>
+										<label class="checkbox">
+											<input name="failReason" type="radio" value="本周天"> 本周天
+										</label>
+									</fieldset>
+									<div class="control-group">
+										<label class="control-label" for="inputTime">自定义:</label>
+										<div class="controls">
+											<input type="text" id="inputTime" placeholder="自定义时间">
+										</div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" id="getEquipTimeSubmit" class="btn btn-default" data-dismiss="modal">确定
 						</button>
 					</div>
 				</div><!-- /.modal-content -->
@@ -332,20 +392,30 @@
 </html>
 <script>
 	$("#borrowTable").on('click','.passApply',function (event) {
-		var udid=$(event.target).parents('.center').data('udid');
-        $.ajax({
-            url: 'changeBorrowApply',
-            type: 'POST',
-            dataType: 'text',
-            data: {isPass: '1',udid:udid}
+        $('#getEquipTime').modal('show');
+        var udid=$(event.target).parents('.center').data('udid');
+        $('#getEquipTimeSubmit').click(function () {
+            var getEquipTime='';
+            if($("#inputTime").val()){
+                getEquipTime=$("#inputTime").val();
+			}else{
+                getEquipTime=$('#getEquipmentDate').serialize().split('=')[1];
+			}
+            $.ajax({
+                url: 'changeBorrowApply',
+                type: 'POST',
+                dataType: 'text',
+                data: {isPass: '1',udid:udid,getEquipTime:getEquipTime}
+            })
+                .done(function(data) {
+                    if(data=='1'){
+                        $(event.target).parents('tr').remove();
+                    }else{
+                        alert('未知错误，请刷新后再处理！');
+                    }
+                });
         })
-            .done(function(data) {
-                if(data=='1'){
-                    $(event.target).parents('tr').remove();
-				}else{
-                    alert('未知错误，请刷新后再处理！');
-				}
-            });
+
 
     });
     $("#borrowTable").on('click','.failApply',function (event) {

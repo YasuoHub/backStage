@@ -61,10 +61,55 @@ app.get('/borrow.html',function (req,res) {
         res.render('login',{});
     }
 });
-app.get('/return.html',function (req,res) {
+app.get('/borrowCheck.html',function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
     if(req.session.stuName){
         var user={name:req.session.stuName};
-        res.render('return',{user:user});
+        var borrowChecks=[];
+        dao.queryByTerm(['isPass','loanStatus'],['1','0'],'userdetails',function (err,result) {
+            borrowChecks=result;
+            dao.finish();
+            res.render('borrowCheck',{user:user,borrowChecks:borrowChecks});
+        });
+    }else {
+        res.render('login',{});
+    }
+});
+app.get('/return.html',function (req,res) {
+    console.log('我是return.html')
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    if(req.session.stuName){
+        var user={name:req.session.stuName};
+        var returninfos=[];
+        dao.queryByTerm(['loanStatus'],['1'],'userdetails',function (err,result) {
+            returninfos=result;
+            dao.finish();
+            res.render('return',{user:user,returninfos:returninfos});
+        });
+    }else {
+        res.render('login',{});
+    }
+});
+app.get('/returnApply.html',function (req,res) {
+    console.log('我是returnApply.html')
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    if(req.session.stuName){
+        var user={name:req.session.stuName};
+        var returninfos=[];
+        dao.queryByTerm(['returnExamineStatus','delateStatus'],['1','1'],'userdetails',function (err,result) {
+            returninfos=result;
+            dao.finish();
+            res.render('returnApply',{user:user,returninfos:returninfos});
+        });
     }else {
         res.render('login',{});
     }
@@ -139,17 +184,160 @@ app.post('/changeBorrowApply',urlencodedParser,function (req,res) {
     var isPass = req.body.isPass;
     var udid = req.body.udid;
     var failReason = null;
+    var getEquipDate = null;
     var whereArr = ['uDid'];
-    var cluarr = ['isPass', 'failReason', 'examineStatus', 'readSatus', 'changeSatus'];
+    var cluarr = ['isPass', 'failReason', 'examineStatus', 'readSatus', 'changeSatus','getEquipDate'];
     if (req.body.failReason) {
         failReason = req.body.failReason;
     }
-    var Paramsarr = [isPass, failReason, '0', '1', '1'];
+    if(req.body.getEquipTime){
+        getEquipDate=decodeURI(req.body.getEquipTime);
+    }
+    console.log("getEquipDate:"+getEquipDate);
+    var Paramsarr = [isPass, failReason, '0', '1', '1',getEquipDate];
     dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
         console.log("修改成功");
         dao.finish();
         return  res.send('1');
     });
+});
+//设备领取
+app.post('/ifGetEquip',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    console.log("我是ifGetEquip");
+    console.log(req.body);
+    // //1,从body里面获得提交的数据
+    var loanStatus = req.body.loanStatus;
+    var udid = req.body.udid;
+    var delateStatus = 1;
+    var getEquipDate = null;
+    var whereArr = ['uDid'];
+    var cluarr = ['loanStatus', 'readSatus', 'changeSatus', 'delateStatus'];
+    if (req.body.delateStatus=='0') {
+        delateStatus = req.body.delateStatus;
+    }
+    console.log("getEquipDate:"+getEquipDate);
+    if(loanStatus=='1'){
+        var Paramsarr = [loanStatus, '1', '1',delateStatus];
+        dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
+            console.log("修改成功");
+            dao.finish();
+            return  res.send('1');
+        });
+    }else if(loanStatus=='0'){
+        if(req.body.failReason!='3'){
+            var Paramsarr = [loanStatus, '1', '1',delateStatus];
+            dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
+                console.log("修改成功");
+                dao.finish();
+                return  res.send('1');
+            });
+        }else{
+            //扣掉信用分数
+            var Paramsarr = [loanStatus, '1', '1',delateStatus];
+            var stuID='';
+            dao.queryByTerm(['uDid'],[udid],'userdetails',function (err, result) {
+                stuID=result[0].userID;
+                dao.queryByTerm(['stuID'],[stuID],'users',function (err,result) {
+                    var creditDegree=result[0].creditDegree-30;
+                    dao.updateRate(['creditDegree'], [creditDegree], ['stuID'],[stuID],'users', function () {
+                        console.log("修改成功");
+                        dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
+                            console.log("修改成功");
+                            dao.finish();
+                            return  res.send('1');
+                        });
+                    });
+                })
+            });
+        }
+    }
+});
+//处理归还申请通过
+app.post('/changeReturnApply',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    console.log("我是changeReturnApply");
+    console.log(req.body);
+    // //1,从body里面获得提交的数据
+    var returnApplyStatus = req.body.returnApplyStatus;
+    var udid = req.body.udid;
+    var failReason = null;
+    var whereArr = ['uDid'];
+    var cluarr = ['returnApplyStatus', 'returnApplyFailReason', 'returnExamineStatus', 'readSatus', 'changeSatus'];
+    if (req.body.returnApplyStatus=='0') {
+        failReason = req.body.failReason;
+    }
+    var Paramsarr = [returnApplyStatus, failReason, '0', '1', '1'];
+    dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
+        console.log("修改成功");
+        dao.finish();
+        return  res.send('1');
+    });
+});
+//处理设备归还
+app.post('/changeReturn',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    console.log("我是changeReturn");
+    console.log(req.body);
+    // //1,从body里面获得提交的数据
+    var returnStatus = req.body.returnStatus;
+    var udid = req.body.udid;
+    var whereArr = ['uDid'];
+    if(returnStatus=='0'){
+        //扣掉信用分数
+        var stuID='';
+        dao.queryByTerm(['uDid'],[udid],'userdetails',function (err, result) {
+            stuID=result[0].userID;
+            dao.queryByTerm(['stuID'],[stuID],'users',function (err,result) {
+                var creditDegree=result[0].creditDegree-30;
+                dao.updateRate(['creditDegree'], [creditDegree], ['stuID'],[stuID],'users', function () {
+                    console.log("修改成功");
+                        dao.finish();
+                        return  res.send('1');
+                });
+            })
+        });
+    }else{
+        var cluarr = ['returnStatus', 'loanStatus', 'readSatus', 'changeSatus'];
+        var Paramsarr = [returnStatus, '0', '1', '1'];
+        dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
+            console.log("修改成功");
+            dao.finish();
+            return  res.send('1');
+        });
+    }
+});
+//处理历史记录查询
+app.post('/getHistory',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    console.log("我是getHistory");
+    console.log(req.body);
+    // //1,从body里面获得提交的数据
+    var term = req.body.term;
+    var termValue = req.body.termValue;
+    var termArr=[];
+    if (term=='searchStuId') {
+        termArr.push('userID');
+    }else if(term=='searchEquipNum'){
+        termArr.push('equipID');
+    }
+    dao.queryByTerm(termArr,[termValue],'userdetails',function (err,result) {
+        console.log("查询成功");
+        dao.finish();
+        return  res.send(result);
+    })
 });
 //登录页面验证
 app.post('/login',urlencodedParser,function (req,res) {
@@ -243,7 +431,7 @@ app.post('/saveUpdate',urlencodedParser,function (req,res) {
                 //声明要返回的数据字符串
                 var returnStr='';
                 //声明要插入数据的column
-                var cluarr=['equipNo','equipName','equipID','equipDescription','equipModel','equipCreator','equipBuyDate','equipAddDate','addMan'];
+                var cluarr=['equipNo','equipName','equipID','equipDescription','equipCreator','equipModel','equipBuyDate','equipAddDate','addMan'];
                 if(data.length!=0){
                     equipID=data[data.length-1].equipID;
                     num = parseInt(equipID.replace(/[^0-9]+/ig,""))+1;
@@ -351,7 +539,6 @@ app.post('/saveRate',urlencodedParser,function (req,res) {
     })(flag);
 });
 app.post('/register',urlencodedParser,function (req,res) {
-
     //1,从body里面获得提交的数据
     var  email= req.body.email;
     var  name= req.body.name;

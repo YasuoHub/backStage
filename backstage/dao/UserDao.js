@@ -36,8 +36,8 @@ function UserDao() {
         });
     };
     /*通过条件获得用户*/
-    this.queryByTerm=function (termArr,termValueArr,users,call) {
-        var sql = "select * from "+users+" where ";
+    this.queryByTerm=function (termArr,termValueArr,users,call,selectStr='*') {
+        var sql = "select "+selectStr+" from "+users+" where ";
         for(let i=0;i<termArr.length;i++){
             if(i==termArr.length-1){
                 sql+=termArr[i]+" = '"+termValueArr[i]+"'";
