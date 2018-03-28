@@ -153,6 +153,21 @@
 </body>
 </html>
 <script>
+	window.onload=function () {
+		var cookieArr=document.cookie.split('; ')
+		for(var i=0;i<cookieArr.length;i++){
+            var mykey=cookieArr[i].split('=')[0];
+            var value=cookieArr[i].split('=')[1];
+            if(mykey=='username'){
+                console.log('username')
+                $('#username').val(value);
+            }
+            if(mykey=='password'){
+                console.log('password')
+                $('#password').val(value);
+            }
+		}
+    }
     function submitInfo() {
         console.log(111);
         console.log($("form").serialize());

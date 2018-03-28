@@ -40,7 +40,7 @@ app.get('/index',function (req,res) {
 //注销登录
 app.get('/logout',function (req,res) {
     req.session.destroy();
-    res.render('login',{});
+    res.redirect('/');
 });
 //各页面跳转
 //首页进来就是借用申请页面
@@ -58,10 +58,11 @@ app.get('/borrow.html',function (req,res) {
             res.render('borrow',{user:user,borrows:borrows});
         });
     }else {
-        res.render('login',{});
+        res.redirect('/');
     }
 });
 app.get('/borrowCheck.html',function (req,res) {
+    console.log('取得的cookie:'+req.cookies)
     //初始化数据查询对象
     var dao = new UserDao();
     //2，数据初始化，连接数据库
@@ -69,13 +70,13 @@ app.get('/borrowCheck.html',function (req,res) {
     if(req.session.stuName){
         var user={name:req.session.stuName};
         var borrowChecks=[];
-        dao.queryByTerm(['isPass','loanStatus'],['1','0'],'userdetails',function (err,result) {
+        dao.queryByTerm(['isPass','loanStatus','returnStatus','delateStatus'],['1','0','0','1'],'userdetails',function (err,result) {
             borrowChecks=result;
             dao.finish();
             res.render('borrowCheck',{user:user,borrowChecks:borrowChecks});
         });
     }else {
-        res.render('login',{});
+        res.redirect('/');
     }
 });
 app.get('/return.html',function (req,res) {
@@ -87,13 +88,13 @@ app.get('/return.html',function (req,res) {
     if(req.session.stuName){
         var user={name:req.session.stuName};
         var returninfos=[];
-        dao.queryByTerm(['loanStatus'],['1'],'userdetails',function (err,result) {
+        dao.queryByTerm(['loanStatus','returnApplyStatus'],['1','1'],'userdetails',function (err,result) {
             returninfos=result;
             dao.finish();
             res.render('return',{user:user,returninfos:returninfos});
         });
     }else {
-        res.render('login',{});
+        res.redirect('/');
     }
 });
 app.get('/returnApply.html',function (req,res) {
@@ -111,7 +112,25 @@ app.get('/returnApply.html',function (req,res) {
             res.render('returnApply',{user:user,returninfos:returninfos});
         });
     }else {
-        res.render('login',{});
+        res.redirect('/');
+    }
+});
+app.get('/suggestReply.html',function (req,res) {
+    console.log('我是suggestReply.html')
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    if(req.session.stuName){
+        var user={name:req.session.stuName};
+        var suggestinfos=[];
+        dao.queryByTerm(['readStatus'],['1'],'suggest',function (err,result) {
+            suggestinfos=result;
+            dao.finish();
+            res.render('suggestReply',{user:user,suggestinfos:suggestinfos});
+        });
+    }else {
+        res.redirect('/');
     }
 });
 app.get('/history.html',function (req,res) {
@@ -127,7 +146,7 @@ app.get('/update.html',function (req,res) {
         var user={name:req.session.stuName,date:new Date().toLocaleDateString()};
         res.render('update',{user:user});
     }else {
-        res.render('login',{});
+        res.redirect('/');
     }
 });
 app.get('/classUpdate.html',function (req,res) {
@@ -135,7 +154,7 @@ app.get('/classUpdate.html',function (req,res) {
         var user={name:req.session.stuName,date:new Date().toLocaleDateString()};
         res.render('classUpdate',{user:user});
     }else {
-        res.render('login',{});
+        res.redirect('/');
     }
 });
 app.get('/service.html',function (req,res) {
@@ -143,7 +162,7 @@ app.get('/service.html',function (req,res) {
         var user={name:req.session.stuName};
         res.render('service',{user:user});
     }else {
-        res.render('login',{});
+        res.redirect('/');
     }
 });
 app.get('/board.html',function (req,res) {
@@ -151,7 +170,7 @@ app.get('/board.html',function (req,res) {
         var user={name:req.session.stuName};
         res.render('board',{user:user});
     }else {
-        res.render('login',{});
+        res.redirect('/');
     }
 });
 app.get('/rate.html',function (req,res) {
@@ -168,7 +187,7 @@ app.get('/rate.html',function (req,res) {
             res.render('rate',{user:user,rates:rates});
         });
     }else {
-        res.render('login',{});
+        res.redirect('/');
     }
 });
 /////////////////////////////////业务处理
@@ -214,33 +233,54 @@ app.post('/ifGetEquip',urlencodedParser,function (req,res) {
     var udid = req.body.udid;
     var delateStatus = 1;
     var getEquipDate = null;
+    var failReason=null;
     var whereArr = ['uDid'];
-    var cluarr = ['loanStatus', 'readSatus', 'changeSatus', 'delateStatus'];
+    var cluarr = ['loanStatus', 'readSatus', 'changeSatus','failReason', 'delateStatus'];
+    var equipNo='';
+    var equipAllNo='';
+    var stuID='';
     if (req.body.delateStatus=='0') {
         delateStatus = req.body.delateStatus;
     }
     console.log("getEquipDate:"+getEquipDate);
+    //成功领取设备
     if(loanStatus=='1'){
-        var Paramsarr = [loanStatus, '1', '1',delateStatus];
+        dao.queryByTerm(['uDid'],[udid],'userdetails',function (err, result) {
+            //初始化数据查询对象
+            var dao1 = new UserDao();
+            //2，数据初始化，连接数据库
+            dao1.init();
+            stuID=result[0].userID;
+            equipNo=result[0].equipID;
+            equipAllNo=result[0].equipID.replace(/[^a-z]+/ig,"").toUpperCase();
+            dao1.updateRate(['canBorrow'],['0'],['equipID'],[result.equipID],function () {
+                console.log("成功更改Borrow信息");
+            })
+            dao1.queryByTerm(['equipAllNo'],[equipAllNo],'equipmentall',function (err,data) {
+                dao1.updateRate(['equipOverplus','equipLoan'],[data[0].equipOverplus-1,data[0].equipLoan+1],['equipAllNo'],[equipAllNo],'equipmentall',function () {
+                    console.log("成功借出设备信息");
+                    dao1.finish();
+                }) ;
+            });
+        });
+        var Paramsarr = [loanStatus, '1', '1',failReason,delateStatus];
         dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
             console.log("修改成功");
             dao.finish();
             return  res.send('1');
         });
-    }else if(loanStatus=='0'){
-        if(req.body.failReason!='3'){
-            var Paramsarr = [loanStatus, '1', '1',delateStatus];
+    }else if(loanStatus=='0'){//未能领取设备
+        if(req.body.failReason!='3'){//判断失败原因-系统原因
+            failReason=req.body.failReason
+            var Paramsarr = [loanStatus, '1', '1',failReason,delateStatus];
             dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
                 console.log("修改成功");
                 dao.finish();
                 return  res.send('1');
             });
-        }else{
+        }else{//判断失败原因-人为原因
             //扣掉信用分数
-            var Paramsarr = [loanStatus, '1', '1',delateStatus];
-            var stuID='';
-            dao.queryByTerm(['uDid'],[udid],'userdetails',function (err, result) {
-                stuID=result[0].userID;
+            var Paramsarr = [loanStatus, '1', '1',failReason,delateStatus];
                 dao.queryByTerm(['stuID'],[stuID],'users',function (err,result) {
                     var creditDegree=result[0].creditDegree-30;
                     dao.updateRate(['creditDegree'], [creditDegree], ['stuID'],[stuID],'users', function () {
@@ -252,7 +292,6 @@ app.post('/ifGetEquip',urlencodedParser,function (req,res) {
                         });
                     });
                 })
-            });
         }
     }
 });
@@ -292,29 +331,65 @@ app.post('/changeReturn',urlencodedParser,function (req,res) {
     var returnStatus = req.body.returnStatus;
     var udid = req.body.udid;
     var whereArr = ['uDid'];
+    var equipNo='';
+    var equipAllNo='';
+    var stuID='';
     if(returnStatus=='0'){
         //扣掉信用分数
-        var stuID='';
         dao.queryByTerm(['uDid'],[udid],'userdetails',function (err, result) {
             stuID=result[0].userID;
             dao.queryByTerm(['stuID'],[stuID],'users',function (err,result) {
                 var creditDegree=result[0].creditDegree-30;
                 dao.updateRate(['creditDegree'], [creditDegree], ['stuID'],[stuID],'users', function () {
                     console.log("修改成功");
-                        dao.finish();
-                        return  res.send('1');
+                    dao.finish();
+                    return  res.send('1');
                 });
             })
         });
+
     }else{
         var cluarr = ['returnStatus', 'loanStatus', 'readSatus', 'changeSatus'];
         var Paramsarr = [returnStatus, '0', '1', '1'];
-        dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
-            console.log("修改成功");
-            dao.finish();
-            return  res.send('1');
+        dao.queryByTerm(['uDid'],[udid],'userdetails',function (err, result) {
+            equipNo=result[0].equipID;
+            equipAllNo=result[0].equipID.replace(/[^a-z]+/ig,"").toUpperCase();
+            dao.queryByTerm(['equipAllNo'],[equipAllNo],'equipmentall',function (err,data) {
+                dao.updateRate(['equipOverplus','equipLoan'],[data[0].equipOverplus+1,data[0].equipLoan-1],['equipAllNo'],[equipAllNo],'equipmentall',function () {
+                    console.log("成功归还设备信息");
+                }) ;
+            });
+            dao.updateRate(cluarr, Paramsarr, whereArr, udid, 'userdetails', function () {
+                console.log("修改成功");
+                dao.finish();
+                return  res.send('1');
+            });
         });
     }
+});
+//处理归还申请通过
+app.post('/suggestReply',urlencodedParser,function (req,res) {
+    //初始化数据查询对象
+    var dao = new UserDao();
+    //2，数据初始化，连接数据库
+    dao.init();
+    console.log("我是suggestReply");
+    console.log(req.body);
+    // //1,从body里面获得提交的数据
+    var delateStatus = req.body.delateStatus;
+    var nowstid = req.body.nowstid;
+    var replyContent = null;
+    var whereArr = ['stid'];
+    var cluarr = ['readStatus', 'reply', 'delateStatus'];
+    if (req.body.delateStatus=='1') {
+        replyContent = req.body.replyContent;
+    }
+    var Paramsarr = ['0', replyContent, delateStatus];
+    dao.updateRate(cluarr, Paramsarr, whereArr, nowstid, 'suggest', function () {
+        console.log("修改成功");
+        dao.finish();
+        return  res.send('1');
+    });
 });
 //处理历史记录查询
 app.post('/getHistory',urlencodedParser,function (req,res) {
@@ -327,13 +402,13 @@ app.post('/getHistory',urlencodedParser,function (req,res) {
     // //1,从body里面获得提交的数据
     var term = req.body.term;
     var termValue = req.body.termValue;
-    var termArr=[];
+    var termArr=['delateStatus'];
     if (term=='searchStuId') {
         termArr.push('userID');
     }else if(term=='searchEquipNum'){
         termArr.push('equipID');
     }
-    dao.queryByTerm(termArr,[termValue],'userdetails',function (err,result) {
+    dao.queryByTerm(termArr,['1',termValue],'userdetails',function (err,result) {
         console.log("查询成功");
         dao.finish();
         return  res.send(result);
@@ -341,6 +416,7 @@ app.post('/getHistory',urlencodedParser,function (req,res) {
 });
 //登录页面验证
 app.post('/login',urlencodedParser,function (req,res) {
+    console.log('我是login');
     //初始化数据查询对象
     var dao = new UserDao();
     //2，数据初始化，连接数据库
@@ -352,17 +428,19 @@ app.post('/login',urlencodedParser,function (req,res) {
     var termArr=['stuID'];
     var termValueArr=[username];
     console.log(req.body);
-    req.session.username=username;
     dao.queryByTerm(termArr,termValueArr,'users',function (err,data) {
         dao.finish();
         if(data.length!=0){
             console.log(data[0]);
-            req.session.stuName         =data[0].stuName;
+            req.session.stuRealID      =data[0].stuID;
+            req.session.stuName        =data[0].stuName;
+            req.session.passwd         =data[0].stuPassWord;
             if(data[0].stuPassWord!=passwd){
                 return   res.end('3');//密码错误
             }
             if(remember){
-                // req.cookies("user",{"username":username,"passwd":passwd});
+                res.cookie('username', req.session.stuRealID, { expires: new Date(Date.now() + 30*24*60*60*1000), httpOnly: false });
+                res.cookie('password', req.session.passwd, { expires: new Date(Date.now() + 30*24*60*60*1000), httpOnly: false });
             }
             console.log(req.session);
             if(data[0].power=='1'){
@@ -417,12 +495,19 @@ app.post('/saveUpdate',urlencodedParser,function (req,res) {
     var  equipDescription= req.body.equipDescription;
     var  addMan= req.session.stuName;
     var  equipAddDate= new Date().toLocaleDateString();
+    var  addEquipNum=0;
     var  termArr=['equipNo'];
     var  termValueArr=[equipNo];
     dao.queryByTerm(['equipAllNo'],[equipNo],'equipmentall',function (err,data) {
         if(data.length==0){
             return  res.end("-1");//表示该实验设备分类不存在
         }else{
+            addEquipNum=data[0].equipNumber+equipNum;
+            console.log('addEquipNum:')
+            console.log(data[0].equipNumber+equipNum);
+            dao.updateRate(['equipNumber'],[addEquipNum],['equipAllNo'],[equipNo],'equipmentall',function () {
+                console.log("成功添加"+equipNum +"件设备");
+            }) ;
             dao.queryByTerm(termArr,termValueArr,'equipmentone',function (err,data) {
                 //声明将要生成的实验设备编号
                 var equipID='';
@@ -538,42 +623,4 @@ app.post('/saveRate',urlencodedParser,function (req,res) {
         }
     })(flag);
 });
-app.post('/register',urlencodedParser,function (req,res) {
-    //1,从body里面获得提交的数据
-    var  email= req.body.email;
-    var  name= req.body.name;
-    var  passwd= req.body.passwd;
-
-    //1,查询
-    //1,创建对象
-    var dao = new UserDao();
-    //2，数据初始化，连接数据库
-    dao.init();
-    //3,查询语句
-    dao.queryByName(name,function (data) {
-        console.log(data);
-
-        if(data.length==0){
-            console.log("执行插入");
-            //执行插入
-            dao.insert(name,email,passwd,function () {
-                dao.finish();
-                res.render('index',{});
-            });
-
-        }else{
-            //回到注册页面，进行提示
-        }
-
-    });
-
-
-    console.log(email+":"+name+":"+passwd);
-
-    //res.render('login',{});
-});
-
-
-
-
 var server = app.listen(8088)
