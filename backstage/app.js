@@ -144,15 +144,26 @@ app.get('/history.html',function (req,res) {
 app.get('/update.html',function (req,res) {
     if(req.session.stuName){
         var user={name:req.session.stuName,date:new Date().toLocaleDateString()};
-        res.render('update',{user:user});
+            res.render('update',{user:user});
     }else {
         res.redirect('/');
     }
 });
+app.post('/getEquipOne',urlencodedParser,function (req,res) {
+    var dao = new UserDao();
+    dao.init();
+    dao.queryByTerm(['equipNo'], [req.body.inputNo], 'equipmentone', function (err, data) {
+        res.json({euipOne:data});
+    })
+})
 app.get('/classUpdate.html',function (req,res) {
+    var dao = new UserDao();
+    dao.init();
     if(req.session.stuName){
         var user={name:req.session.stuName,date:new Date().toLocaleDateString()};
-        res.render('classUpdate',{user:user});
+        dao.query('equipmentall',function (err,data) {
+            res.render('classUpdate',{user:user,equipAll:data});
+        })
     }else {
         res.redirect('/');
     }
@@ -623,4 +634,5 @@ app.post('/saveRate',urlencodedParser,function (req,res) {
         }
     })(flag);
 });
+
 var server = app.listen(8088)

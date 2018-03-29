@@ -1548,8 +1548,6 @@ ul.chat.metro li.right .message .arrow {
   vertical-align: middle;
   cursor: pointer;
   border: 1px solid #a7a9aa;
-  -webkit-border-radius: 0px !important;
-  border-radius: 0px !important;
 }
 
 .btn i {
