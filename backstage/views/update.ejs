@@ -221,7 +221,7 @@
 <script src="http://apps.bdimg.com/libs/vue/1.0.14/vue.js"></script>
 <script>
 	var vm = new Vue({
-		el:'body',
+		el:'#content',
 		data:{
             equipOneData:'',
             startNum:0,
@@ -255,7 +255,7 @@
             },
             next:function () {
                 var This = this;
-                if(This.equipOneData.length-This.endNum<5) {
+                if(This.equipOneData.length-This.endNum<=0) {
 					$('#next').attr("disabled","disabled");
                 }else {
                     $('#next').removeAttr("disabled","disabled");
