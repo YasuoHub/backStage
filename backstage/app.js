@@ -513,13 +513,14 @@ app.post('/saveUpdate',urlencodedParser,function (req,res) {
         if(data.length==0){
             return  res.end("-1");//表示该实验设备分类不存在
         }else{
-            addEquipNum=data[0].equipNumber+equipNum;
+            addEquipNum=parseInt(data[0].equipNumber)+parseInt(equipNum);
             console.log('addEquipNum:')
             console.log(data[0].equipNumber+equipNum);
             dao.updateRate(['equipNumber'],[addEquipNum],['equipAllNo'],[equipNo],'equipmentall',function () {
                 console.log("成功添加"+equipNum +"件设备");
             }) ;
             dao.queryByTerm(termArr,termValueArr,'equipmentone',function (err,data) {
+                console.log(data);
                 //声明将要生成的实验设备编号
                 var equipID='';
                 //声明初始编号num
@@ -529,7 +530,7 @@ app.post('/saveUpdate',urlencodedParser,function (req,res) {
                 //声明要插入数据的column
                 var cluarr=['equipNo','equipName','equipID','equipDescription','equipCreator','equipModel','equipBuyDate','equipAddDate','addMan'];
                 if(data.length!=0){
-                    equipID=data[data.length-1].equipID;
+                    equipID=data[0].equipID;
                     num = parseInt(equipID.replace(/[^0-9]+/ig,""))+1;
                     equipID=equipNo+num;
                 }else{

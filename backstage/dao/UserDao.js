@@ -111,8 +111,7 @@ function UserDao() {
             if(i==cluarr.length-1){
                 userAddSql +=cluarr[i]+"= ? WHERE ";
                 for(let j=0;j<whereArr.length;j++){
-                        userAddSql +=whereArr[j]+"="+flag;
-
+                        userAddSql +=whereArr[j]+"= '"+flag+"'";
                 }
             }else{
                 userAddSql +=cluarr[i]+"= ?,";

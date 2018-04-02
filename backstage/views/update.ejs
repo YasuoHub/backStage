@@ -49,7 +49,7 @@
 									<td class="center">{{equipData.equipName}}</td>
 									<td class="center">{{equipData.equipModel}}</td>
 									<td class="center">{{equipData.equipCreator}}</td>
-									<td v-if="equipData.equipStatus==0" class="center">完好</td>
+									<td v-if="equipData.equipStatus==1" class="center">完好</td>
 									<td v-else class="center">损坏</td>
 									<td class="center">{{equipData.addMan}}</td>
 								</tr>
@@ -81,7 +81,7 @@
 								<div class="control-group">
 									<label class="control-label" for="equipNo">设备种类</label>
 									<div class="controls">
-										<input name="equipNo" type="text" class="span6 typeahead" id="equipNo"  data-provide="typeahead" data-items="4" data-source='["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Dakota","North Carolina","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"]'>
+										<input name="equipNo" type="text" class="span6 typeahead" id="equipNo"  data-provide="typeahead" data-items="4" data-source=''>
 										<p class="help-block">输入设备种类编号(必填)</p>
 									</div>
 								</div>
@@ -178,7 +178,7 @@
 				</div>
 			</div>
 			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">确定
+				<button type="button" class="btn btn-default reloadBtn" data-dismiss="modal">确定
 				</button>
 			</div>
 		</div><!-- /.modal-content -->
@@ -302,5 +302,8 @@
 				}
 			});
         }
+    })
+	$('.reloadBtn').click(function () {
+		window.location.reload();
     })
 </script>
