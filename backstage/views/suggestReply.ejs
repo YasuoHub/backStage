@@ -33,8 +33,9 @@
 						</thead>
                         <% if (suggestinfos.length) { %>
 						<tbody>
-                        <% suggestinfos.forEach(function(suggestinfo){ %>
+                        <% suggestinfos.forEach(function(suggestinfo,index){ %>
 						<tr>
+							<td><%=index+1%></td>
 							<td><%=suggestinfo.stuID%></td>
 							<td class="center"><%=suggestinfo.stuName%></td>
 							<td class="center"><%=suggestinfo.content%></td>
@@ -51,37 +52,7 @@
                         <% }) %>
 						</tbody>
                         <% } %>
-						<!--	<tbody>
-							<tr v-for="borrow in borrows">
-								<td>{{borrow.userID}}</td>
-								<td class="center">{{borrow.userName}}</td>
-								<td class="center">{{borrow.equipID}}</td>
-								<td class="center">{{borrow.equipName}}</td>
-								<td class="center">{{borrow.addDate.toLocaleDateString()}}</td>
-								<td class="center">{{borrow.loanDay}}</td>
-								<td class="center " :data-udid="{{borrow.userName}}">
-									<a class="btn btn-success passApply" href="#">
-										<i class="halflings-icon white ok"></i>
-									</a>
-									<a class="btn btn-danger failApply" href="#">
-										<i class="halflings-icon white remove"></i>
-									</a>
-								</td>
-							</tr>
-							</tbody>-->
 					</table>
-					<div class="pagination pagination-centered">
-						<ul>
-							<li><a href="#"><</a></li>
-							<li class="active">
-								<a href="#">1</a>
-							</li>
-							<li><a href="#">2</a></li>
-							<li><a href="#">3</a></li>
-							<li><a href="#">4</a></li>
-							<li><a href="#">></a></li>
-						</ul>
-					</div>
 				</div>
 			</div><!--/span-->
 			</div><!--/row-->

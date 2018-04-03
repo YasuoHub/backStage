@@ -37,8 +37,9 @@
 						</thead>
                         <% if (borrowChecks.length) { %>
 						<tbody>
-                        <% borrowChecks.forEach(function(borrowCheck){ %>
+                        <% borrowChecks.forEach(function(borrowCheck,index){ %>
 						<tr>
+							<td><%=index+1%></td>
 							<td><%=borrowCheck.userID%></td>
 							<td class="center"><%=borrowCheck.userName%></td>
 							<td class="center"><%=borrowCheck.equipID%></td>
@@ -77,18 +78,6 @@
 							</tr>
 							</tbody>-->
 					</table>
-					<div class="pagination pagination-centered">
-						<ul>
-							<li><a href="#"><</a></li>
-							<li class="active">
-								<a href="#">1</a>
-							</li>
-							<li><a href="#">2</a></li>
-							<li><a href="#">3</a></li>
-							<li><a href="#">4</a></li>
-							<li><a href="#">></a></li>
-						</ul>
-					</div>
 				</div>
 			</div><!--/span-->
 			</div><!--/row-->

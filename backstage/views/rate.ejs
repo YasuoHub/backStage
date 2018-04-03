@@ -45,7 +45,6 @@
 						</table>
 						<div class="save">
 							<button type="button" class="btn btn-primary saveBtn">保存</button>
-							<button type="button" class="btn cancelBtn">取消</button>
 						</div>
 					</div>
 				</div><!--/span-->
@@ -134,12 +133,6 @@
 </html>
 <script>
     $(".save").on("click",'.saveBtn',changeRate);
-//    $(".changeInfo").click(function () {
-//           $(this).addClass('saveBtn');
-//           $(this).removeClass('changeInfo');
-//           $(this).html("保存");
-//       }
-//	)
     function changeRate() {
         var This=this;
         var stuIdArr=[];
@@ -167,46 +160,5 @@
                     alert("保存失败,请刷新后重试！");
                 }
             });
-//        $(This).removeClass('saveBtn');
-//        $(This).addClass('changeInfo');
-//        $(This).html("修改");
-//        $(This).off("click",changeRate);
     }
-//	$(".save").on('click','.saveBtn',function () {
-//        var stuIdArr=[];
-//        var stuNameArr=[];
-//        var stuPhoneArr=[];
-//        for(let i=0;i<$(".stuId").length;i++){
-//            stuIdArr[i]=$(".stuId")[i].innerHTML;
-//        }
-//        for(let j=0;j<$(".stuName").length;j++){
-//            stuNameArr[j]=$(".stuName")[j].innerHTML;
-//        }
-//        for(let k=0;k<$(".stuPhone").length;k++){
-//            stuPhoneArr[k]=$(".stuPhone")[k].innerHTML;
-//        }
-//        console.log(stuNameArr);
-//        $.ajax({
-//            url: 'saveRate',
-//            type: 'POST',
-//            dataType: 'text',
-//            data: {'stuIdArr': stuIdArr,'stuNameArr': stuNameArr,'stuPhoneArr': stuPhoneArr},
-//        })
-//            .done(function(data) {
-//                if(data=="1"){
-//                    alert("保存成功");
-//                }else{
-//                    alert("保存失败,请刷新后重试！");
-//                }
-//            });
-//        $(this).addClass('changeInfo');
-//        $(this).removeClass('saveBtn');
-//        $(this).html("修改");
-//    })
-//	$(".saveBtn").click();
-
-
-
-
-
 </script>
